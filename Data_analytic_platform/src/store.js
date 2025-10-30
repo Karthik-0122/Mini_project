@@ -1,8 +1,7 @@
 import { create } from 'zustand';
 
-// This store will hold all the data for our dashboard
 export const useDashboardStore = create((set) => ({
-  // --- Initial state is all null ---
+  // --- Initial state ---
   kpiData: null,
   insights: null,
   dictionary: null,
@@ -11,18 +10,17 @@ export const useDashboardStore = create((set) => ({
   tableData: null,
   dataHealth: null,
   
-  // --- This function will be called by UploadPage ---
+  // --- This function is now "safer" ---
   setAnalysisData: (data) => set({
-    kpiData: data.kpiData,
-    insights: data.insights,
-    dictionary: data.dictionary,
-    columnDist: data.columnDist,
-    timeSeries: data.timeSeries,
-    tableData: data.tableData,
-    dataHealth: data.dataHealth,
+    kpiData: data?.kpiData || null,
+    insights: data?.insights || null,
+    dictionary: data?.dictionary || null,
+    columnDist: data?.columnDist || null,
+    timeSeries: data?.timeSeries || null,
+    tableData: data?.tableData || null,
+    dataHealth: data?.dataHealth || null,
   }),
   
-  // --- This function can be used to clear data on (e.g.) logout ---
   clearAnalysisData: () => set({
     kpiData: null,
     insights: null,

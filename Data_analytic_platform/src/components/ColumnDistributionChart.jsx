@@ -3,6 +3,9 @@ import ReactECharts from 'echarts-for-react';
 
 export default function ColumnDistributionChart({ columnName, chartData, onBarClick }) {
   const option = {
+    backgroundColor: '#ffffff',
+    textStyle: { color: '#111827' },
+    color: ['#2563eb'],
     tooltip: {
       trigger: 'item'
     },
@@ -15,14 +18,16 @@ export default function ColumnDistributionChart({ columnName, chartData, onBarCl
     xAxis: {
       type: 'category',
       data: chartData.map(item => item.name),
-      axisLine: { show: false },
+      axisLine: { show: true, lineStyle: { color: '#e5e7eb' } },
       axisTick: { show: false },
+      axisLabel: { color: '#6b7280' }
     },
     yAxis: {
       type: 'value',
       splitLine: {
-        lineStyle: { type: 'dashed', color: 'var(--border-color)' }
-      }
+        lineStyle: { type: 'dashed', color: '#e5e7eb' }
+      },
+      axisLabel: { color: '#6b7280' }
     },
     dataZoom: [
       {
@@ -43,11 +48,14 @@ export default function ColumnDistributionChart({ columnName, chartData, onBarCl
         name: 'Count',
         type: 'bar',
         data: chartData.map(item => item.value),
-        color: 'var(--primary-blue)',
+        // Color each bar using the palette above
+        itemStyle: {
+          color: '#2563eb'
+        },
         barWidth: '60%',
         emphasis: {
           itemStyle: {
-            color: '#004ecc' // Darker blue on hover
+            color: '#1e40af' // Darker blue on hover
           }
         }
       }
