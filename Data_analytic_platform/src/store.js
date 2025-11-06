@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export const useDashboardStore = create((set) => ({
+export default create((set) => ({
   // --- Initial state ---
   kpiData: null,
   insights: null,
@@ -9,6 +9,7 @@ export const useDashboardStore = create((set) => ({
   timeSeries: null,
   tableData: null,
   dataHealth: null,
+  correlationMatrix: null,
   
   // --- This function is now "safer" ---
   setAnalysisData: (data) => set({
@@ -19,6 +20,7 @@ export const useDashboardStore = create((set) => ({
     timeSeries: data?.timeSeries || null,
     tableData: data?.tableData || null,
     dataHealth: data?.dataHealth || null,
+    correlationMatrix: data?.correlationMatrix || null,
   }),
   
   clearAnalysisData: () => set({
@@ -29,5 +31,6 @@ export const useDashboardStore = create((set) => ({
     timeSeries: null,
     tableData: null,
     dataHealth: null,
+    correlationMatrix: null,
   }),
 }));

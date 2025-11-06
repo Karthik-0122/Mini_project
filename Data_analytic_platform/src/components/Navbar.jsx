@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Database, Upload } from 'lucide-react';
-import { useDashboardStore } from '../store'; // Import the store
+import useDashboardStore from '../store'; // Import the store
 
 export default function Navbar() {
   const navigate = useNavigate();

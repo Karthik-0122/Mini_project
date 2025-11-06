@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useDashboardStore } from '../store';
+import useDashboardStore from '../store';
 import { UploadAnimation } from '../components/UploadAnimation';
 import { UploadCloud, FileCheck, Loader, ArrowRight } from 'lucide-react';
 import Papa from 'papaparse'; // Import the CSV parser

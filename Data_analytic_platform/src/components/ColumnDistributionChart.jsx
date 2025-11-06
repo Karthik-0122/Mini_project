@@ -64,7 +64,7 @@ export default function ColumnDistributionChart({ columnName, chartData, onBarCl
 
   return (
     <div className="card column-dist-chart">
-      <div className="card-title">Distribution of: **{columnName}**</div>
+      <div className="card-title">Distribution of: {columnName}</div>
       <ReactECharts 
         option={option} 
         style={{ height: '350px' }} 

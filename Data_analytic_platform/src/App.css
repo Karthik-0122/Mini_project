@@ -1,26 +1,15 @@
 /* --- 1. Global Theme & Reset --- */
 :root {
   --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  /* Light/white theme */
-  --bg-color: #ffffff;           /* Page background */
-  --surface-color: #ffffff;      /* Card surfaces */
-  --border-color: #e5e7eb;       /* Light gray borders */
-  --text-primary: #111827;       /* Almost black */
-  --text-secondary: #6b7280;     /* Muted gray */
-  --primary-blue: #2563eb;       /* Button/brand */
-  --primary-blue-light: #e0e7ff; /* Button hover bg */
-  --green-accent: #10b981;
-  --red-accent: #ef4444;
-
-  /* Chart palette */
-  --chart-1: #2563eb;
-  --chart-2: #16a34a;
-  --chart-3: #f59e0b;
-  --chart-4: #ef4444;
-  --chart-5: #8b5cf6;
-  --chart-6: #06b6d4;
-  --chart-7: #f97316;
-  --chart-8: #22c55e;
+  --bg-color: #f4f7fa;
+  --surface-color: #ffffff;
+  --border-color: #e0e7f1;
+  --text-primary: #1a202c;
+  --text-secondary: #5a6a85;
+  --primary-blue: #0062ff;
+  --primary-blue-light: #e6f0ff;
+  --green-accent: #00b894;
+  --red-accent: #d63031;
 }
 
 * {
@@ -232,4 +221,42 @@ body {
   border: 1px solid var(--border-color);
   background-color: var(--bg-color);
   color: var(--text-primary);
+}
+
+
+
+.data-health-report { 
+  grid-area: datahealth; 
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+
+
+/* --- ADD THIS TO THE BOTTOM OF YOUR App.css --- */
+
+/* --- 9. Upgraded Analytics Layout --- */
+/* This changes the grid to fit the heatmap */
+.dashboard-layout {
+  grid-template-areas:
+    "nav nav nav nav"
+    "kpi1 kpi2 kpi3 kpi4"
+    "insights insights dictionary dictionary"
+    "chart1 chart1 chart2 chart2"
+    "table table table heatmap"  /* Replaced datahealth with heatmap */
+    "table table table health-report"; /* Added new area for smaller cards */
+}
+
+/* This is the new area for the smaller cards */
+.health-report-stack { 
+  grid-area: health-report; 
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* This is the new grid area for the heatmap */
+.correlation-heatmap {
+  grid-area: heatmap;
 }

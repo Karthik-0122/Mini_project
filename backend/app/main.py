@@ -12,57 +12,57 @@ from app.analysis_utils import (
     get_column_distribution,
     get_time_series_data,
     get_table_data,
-    get_data_health
+    get_data_health,
+    get_correlation_matrix
 )
 
 app = FastAPI(
     title="Data Analytics Platform API",
     description="API for processing uploaded files and generating dashboard analytics.",
-    version="1.0.0"
+    version="1.1.0"
 )
 
-# --- CORS Middleware ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"], # Your React app
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- MODIFIED ENDPOINT ---
 @app.post("/api/v1/analyze")
 async def analyze_file(
     file: UploadFile = File(...),
-    col_dist_target: str = Form(None), # Optional: Column for Distribution Chart
-    col_time_target: str = Form(None)  # Optional: Column for Time Series Chart
+    col_dist_target: str = Form(None),
+    col_time_target: str = Form(None)
 ):
-    """
-    This is the main endpoint.
-    It now accepts optional form fields for target columns.
-    """
     try:
-        # 1. Read the file into Pandas
         contents = await file.read()
         try:
             df = pd.read_csv(io.StringIO(contents.decode('utf-8')))
         except UnicodeDecodeError:
             df = pd.read_csv(io.StringIO(contents.decode('latin-1')))
         
-        # --- 2. Run all analysis modules ---
-        
         kpis = get_kpis(df)
+        correlation_result = get_correlation_matrix(df)
         
-        # --- 3. Build the final JSON response ---
-        # We pass the optional column names to the functions
+        # This function now returns the full {timeColumn, seriesData, xAxisData} object
+        time_series_result = get_time_series_data(df, target_column=col_time_target) 
+
+        insights = get_actionable_insights(df, kpis, correlation_result['matrix'])
+        
         response_data = {
             "kpiData": kpis,
-            "insights": get_actionable_insights(df, kpis),
+            "insights": insights,
             "dictionary": get_data_dictionary(df),
             "columnDist": get_column_distribution(df, target_column=col_dist_target),
-            "timeSeries": get_time_series_data(df, target_column=col_time_target),
+            "timeSeries": time_series_result, # <-- Send the whole object
             "tableData": get_table_data(df),
-            "dataHealth": get_data_health(df)
+            "dataHealth": get_data_health(df),
+            "correlationMatrix": {
+                "columns": correlation_result['columns'],
+                "data": correlation_result['data']
+            }
         }
         
         return response_data
@@ -74,9 +74,7 @@ async def analyze_file(
 
 @app.get("/")
 def read_root():
-    """A simple root endpoint to check if the server is running."""
     return {"status": "Backend server is running!"}
 
-# --- This allows running the file directly with `python app/main.py` ---
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

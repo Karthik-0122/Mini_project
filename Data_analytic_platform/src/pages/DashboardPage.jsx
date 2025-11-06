@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDashboardStore } from '../store'; // Import the store
+import useDashboardStore from '../store';
 import '../App.css'; 
 
-// Import all dashboard components
-import Navbar from '../components/Navbar';
-import KpiCard from '../components/KpiCard';
-import ActionableInsights from '../components/ActionableInsights';
-import DataDictionary from '../components/DataDictionary';
-import ColumnDistributionChart from '../components/ColumnDistributionChart';
-import TimeSeriesTrends from '../components/TimeSeriesTrends';
-import InteractiveDataTable from '../components/InteractiveDataTable';
-import DataHealthMonitoring from '../components/DataHealthMonitoring';
-import ReportAndAutomation from '../components/ReportAndAutomation';
+// Import all components (including the new heatmap)
+import  Navbar  from '../components/Navbar';
+import  KpiCard  from '../components/KpiCard';
+import  ActionableInsights  from '../components/ActionableInsights';
+import  DataDictionary  from '../components/DataDictionary';
+import  ColumnDistributionChart  from '../components/ColumnDistributionChart';
+import  TimeSeriesTrends  from '../components/TimeSeriesTrends';
+import  InteractiveDataTable  from '../components/InteractiveDataTable';
+import  DataHealthMonitoring  from '../components/DataHealthMonitoring';
+import  ReportAndAutomation  from '../components/ReportAndAutomation';
+import  CorrelationHeatmap  from '../components/CorrelationHeatmap'; // <-- Import new component
 
 export default function DashboardPage() {
-  // --- 1. Get all data from the global store ---
   const {
     kpiData,
     insights,
@@ -23,26 +23,21 @@ export default function DashboardPage() {
     columnDist,
     timeSeries,
     tableData,
-    dataHealth
+    dataHealth,
+    correlationMatrix // <-- Get new data
   } = useDashboardStore();
   
   const navigate = useNavigate();
-  
-  // This state will track the user-selected column
   const [selectedColumn, setSelectedColumn] = useState(null);
 
-  // --- 2. Add a "guard" ---
   useEffect(() => {
     if (!kpiData) {
-      console.log("No data found, redirecting to upload page.");
       navigate('/');
     } else {
-      // Set the default column for the chart when data first loads
       setSelectedColumn(columnDist.columnName);
     }
   }, [kpiData, navigate, columnDist]);
 
-  // --- 3. Add a "loading" state ---
   if (!kpiData) {
     return (
       <div style={{
@@ -58,7 +53,7 @@ export default function DashboardPage() {
     );
   }
 
-  // --- 4. Render the dashboard with REAL data ---
+  // --- This is the new, upgraded layout ---
   return (
     <div className="dashboard-layout">
       <Navbar />
@@ -94,22 +89,30 @@ export default function DashboardPage() {
 
       <ColumnDistributionChart 
         chartData={columnDist.chartData}
-        columnName={selectedColumn} // Use the state variable here
+        columnName={selectedColumn}
       />
       <TimeSeriesTrends 
-        seriesData={timeSeries.seriesData} 
         timeColumn={timeSeries.timeColumn}
+        seriesData={timeSeries.seriesData} 
+        xAxisData={timeSeries.xAxisData}
       />
 
       <InteractiveDataTable 
         rowData={tableData.rowData} 
         columnDefs={tableData.columnDefs}
-        // This is the interaction! Clicking a header changes the chart.
         onColumnHeaderClick={(col) => setSelectedColumn(col)} 
       />
       
-      <DataHealthMonitoring healthData={dataHealth} />
-      <ReportAndAutomation />
+      {/* --- NEW: Place the heatmap in its grid area --- */}
+      <div className="correlation-heatmap">
+        <CorrelationHeatmap heatmapData={correlationMatrix} />
+      </div>
+
+      {/* --- NEW: Stack the other two cards in their new area --- */}
+      <div className="health-report-stack">
+        <DataHealthMonitoring healthData={dataHealth} />
+        <ReportAndAutomation />
+      </div>
     </div>
   );
 }
