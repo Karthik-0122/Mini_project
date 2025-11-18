@@ -227,16 +227,7 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard-page-container">
-      {/* --- 1. Header Bar --- */}
-      <div className="page-header-bar" style={{justifyContent: 'space-between'}}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Database size={24} color="var(--color-licorice)" />
-          <span>DATASTREAM / Dashboard</span>
-        </div>
-        <button className="secondary-button" onClick={() => navigate('/home')}>Back to Home</button>
-      </div>
-
-      {/* --- 2. Page Content (Conditional) --- */}
+      {/* Page Content */}
       <div className="page-content">
         {renderContent()}
       </div>

@@ -11,21 +11,21 @@ const tools = [
     title: "AI-Powered Analysis",
     description: "Automatically analyze your data and surface key trends in seconds",
     icon: <BarChart />,
-    action: 'navigate', // Direct navigation - NO MODAL
-    destination: '/ai-analysis', // Must match route in App.jsx
+    action: 'navigate',
+    destination: '/ai-analysis',
   },
   {
     title: "Visual Pipeline Builder",
     description: "Build custom workflows to clean, transform, and analyze data.",
     icon: <SlidersHorizontal />,
-    action: 'openModal', // Shows upload modal first
+    action: 'openModal',
     destination: '/pipeline',
   },
   {
     title: "Quick Data Profiler",
     description: "Get a fast overview of your file's columns, data types, and missing values.",
     icon: <FileText />,
-    action: 'openModal', // Shows upload modal first
+    action: 'openModal',
     destination: '/dashboard',
   },
   {
@@ -37,24 +37,15 @@ const tools = [
   },
 ];
 
-export default function HomePage() {
+export default function ToolkitPage() {
   const navigate = useNavigate();
-  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalNavTarget, setModalNavTarget] = useState(null);
 
   const handleCardClick = (tool) => {
-    console.log('🔍 Tool clicked:', tool.title);
-    console.log('📍 Action:', tool.action);
-    console.log('🎯 Destination:', tool.destination);
-    
     if (tool.action === 'navigate') {
-      // Direct navigation for AI Analysis - NO MODAL
-      console.log('✅ Navigating directly to:', tool.destination);
       navigate(tool.destination);
     } else if (tool.action === 'openModal') {
-      // Open modal for other tools
-      console.log('📤 Opening modal for:', tool.title);
       setModalNavTarget(tool.destination);
       setIsModalOpen(true);
     }
@@ -62,6 +53,19 @@ export default function HomePage() {
 
   return (
     <>
+      {/* Floating Transparent Navbar */}
+      <nav className="tk-glassy-floating-nav">
+          <div className="tk-glassy-nav-inner">
+            <div className="tk-nav-logo">
+              <span style={{ fontWeight: 600, fontSize: 22, color: 'var(--text-dark)', letterSpacing: '-0.01em' }}>Logo</span>
+            </div>
+            <div className="tk-nav-links">
+              <a href="#use-cases">Use Cases</a>
+              <a href="#faqs">FAQs</a>
+            </div>
+          </div>
+        </nav>
+
       <div className="tk-page">
         <main className="tk-main">
           {/* Header */}
@@ -83,7 +87,6 @@ export default function HomePage() {
               Select a tool below to start analyzing your data.
             </motion.p>
           </header>
-
           {/* Tools Grid */}
           <section className="tk-tools-section">
             <motion.div
@@ -95,15 +98,13 @@ export default function HomePage() {
                 <motion.div
                   key={tool.title}
                   className="tk-tool-card"
-                  style={{ 
-                    opacity: tool.action === 'disabled' ? 0.7 : 1
-                  }}
+                  style={{ opacity: tool.action === 'disabled' ? 0.7 : 1 }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.35, delay: index * 0.08 }}
                   whileHover={{
                     y: -6,
-                    boxShadow: "0px 12px 28px rgba(38, 28, 26, 0.08)"
+                    boxShadow: "0 14px 40px rgba(15,23,42,0.08)",
                   }}
                 >
                   <div>
@@ -128,7 +129,6 @@ export default function HomePage() {
               ))}
             </motion.div>
           </section>
-
           {/* Recent Activity */}
           <motion.section
             className="tk-activity"
@@ -152,7 +152,6 @@ export default function HomePage() {
           </motion.section>
         </main>
       </div>
-      
       {/* Upload Modal - Only for Pipeline & Profiler */}
       <UploadModal 
         isOpen={isModalOpen}

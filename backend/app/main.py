@@ -1,13 +1,37 @@
-import pandas as pd
+# backend/app/main.py
+import os
 import io
 import json
+import traceback
+import logging
+
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from dotenv import load_dotenv
 import uvicorn
+import pandas as pd
 
-# --- Make sure this import is correct ---
+# ----------------------------
+# REMOVE THIS ENTIRE SECTION - NOT NEEDED ANYMORE
+# ----------------------------
+# try:
+#     from langchain.agents import AgentType  # type: ignore
+# except Exception:
+#     class AgentType:
+#         ZERO_SHOT_REACT_DESCRIPTION = "zero-shot-react-description"
+#         REACT_DOCSTORE = "react-docstore"
+#         # add additional constants your project expects here if needed
+# 
+#     logging.getLogger("uvicorn.error").warning(
+#         "langchain.agents.AgentType not found — using a compatibility shim."
+#     )
+
+# ----------------------------
+# Your existing imports (ensure these paths are correct in your project)
+# ----------------------------
 from app.analysis_utils import (
-    read_uploaded_file_to_df, # <-- THIS IS THE CRITICAL IMPORT
+    read_uploaded_file_to_df,
     get_kpis,
     get_actionable_insights,
     get_data_dictionary,
@@ -18,9 +42,20 @@ from app.analysis_utils import (
     get_correlation_matrix
 )
 
-# --- This import must be correct too ---
 from app.core.workflow.workflow import WorkflowExecutor
 
+# ai agent factory & query functions (your implementation)
+from app.ai_agent import create_agent, query_agent
+
+# ----------------------------
+# Load environment
+# ----------------------------
+# Adjust dotenv_path if needed; this assumes a ../.env relative to backend/
+load_dotenv(dotenv_path="../.env")
+
+# ----------------------------
+# App & CORS
+# ----------------------------
 app = FastAPI(
     title="Data Analytics Platform API",
     description="API for processing files and running analytics dashboards & pipelines.",
@@ -35,7 +70,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- ENDPOINT 1: For the initial UploadPage ---
+# ----------------------------
+# In-memory agent storage (keeps the last created agent)
+# ----------------------------
+agent_storage = {"agent": None}
+
+# ----------------------------
+# Pydantic model for agent query
+# ----------------------------
+class QueryRequest(BaseModel):
+    question: str
+
+# ----------------------------
+# Endpoint 1: analyze file (unchanged logic, uses read_uploaded_file_to_df)
+# ----------------------------
 @app.post("/api/v1/analyze")
 async def analyze_file(
     file: UploadFile = File(...),
@@ -44,18 +92,15 @@ async def analyze_file(
 ):
     try:
         contents = await file.read()
-        
-        # --- THIS IS THE LINE THAT FIXES THE ERROR ---
-        # It calls your smart function instead of pd.read_csv
+        # Use your robust reader (handles csv/xlsx etc.)
         df = read_uploaded_file_to_df(contents, file.filename)
-        # --- END OF FIX ---
 
-        # Run all analysis modules
+        # Run analysis functions
         kpis = get_kpis(df)
         correlation_result = get_correlation_matrix(df)
-        time_series_result = get_time_series_data(df, target_column=col_time_target) 
+        time_series_result = get_time_series_data(df, target_column=col_time_target)
         insights = get_actionable_insights(df, kpis, correlation_result['matrix'])
-        
+
         response_data = {
             "kpiData": kpis,
             "insights": insights,
@@ -69,15 +114,17 @@ async def analyze_file(
                 "data": correlation_result['data']
             }
         }
-        
+
         return response_data
-        
+
     except Exception as e:
-        import traceback
-        traceback.print_exc() 
+        # Print full traceback to console for easier debugging in dev
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
-# --- ENDPOINT 2: For the Pipeline Builder Page ---
+# ----------------------------
+# Endpoint 2: run workflow (pipeline builder)
+# ----------------------------
 @app.post("/workflow/run/")
 async def run_workflow(
     file: UploadFile = File(...),
@@ -88,27 +135,80 @@ async def run_workflow(
         pipeline_data = json.loads(pipeline_json)
         nodes_list = pipeline_data.get('nodes', [])
         edges_list = pipeline_data.get('edges', [])
-        
+
         executor = WorkflowExecutor(
-            nodes=nodes_list, 
-            edges=edges_list, 
+            nodes=nodes_list,
+            edges=edges_list,
             file_contents=file_contents,
-            file_name=file.filename # Pass the filename
+            file_name=file.filename
         )
-        
+
         result = executor.run()
-        
+
         return {"success": True, "result": result}
-        
+
     except Exception as e:
-        print(f"Error during workflow execution: {e}")
-        import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
+# ----------------------------
+# Endpoint 3: AI Chatbot (creates agent and queries it immediately)
+# This endpoint will also store the created agent in memory for later calls to /query_agent
+# ----------------------------
+@app.post("/api/v1/chat")
+async def chat_with_file(
+    file: UploadFile = File(...),
+    question: str = Form(...)
+):
+    try:
+        contents = await file.read()
+
+        # Create the agent using your ai_agent.create_agent implementation
+        agent = create_agent(contents, file.filename)
+        if agent is None:
+            raise HTTPException(status_code=500, detail="Could not create AI agent.")
+
+        # Store agent in memory for subsequent queries (query_agent endpoint)
+        agent_storage["agent"] = agent
+
+        # Query the agent immediately for the returned answer
+        answer = query_agent(agent, question)
+        return {"answer": answer}
+
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error in chat: {e}")
+
+# ----------------------------
+# Endpoint 4: query existing agent (requires agent to be created first)
+# ----------------------------
+@app.post("/query_agent")
+async def handle_agent_query(request: QueryRequest):
+    user_question = request.question
+    agent = agent_storage.get("agent")
+
+    if agent is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Agent not initialized. Please upload a file first (use /api/v1/chat)."
+        )
+
+    try:
+        answer = query_agent(agent, user_question)
+        return {"answer": answer}
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error processing query: {str(e)}")
+
+# ----------------------------
+# Root health endpoint
+# ----------------------------
 @app.get("/")
 def read_root():
     return {"status": "Backend server is running!"}
 
+# ----------------------------
+# Run
+# ----------------------------
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)

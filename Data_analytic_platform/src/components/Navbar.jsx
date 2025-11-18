@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Search, Save, DownloadCloud, Bell, Settings, Database, ChevronDown } from 'lucide-react';
+import { Search, Bell, Settings, Database } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';   // ← ADDED
 
 // Logo Component
 const Logo = () => (
@@ -31,24 +32,21 @@ const Logo = () => (
   </div>
 );
 
-export default function Navbar({ pageTitle = 'Dashboard', hasSave = false, hasExport = false, onSave, onExport }) {
+export default function Navbar({ pageTitle = 'Dashboard' }) {
   const [searchValue, setSearchValue] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+
+  const navigate = useNavigate();     // ← ADDED
 
   // Determine current "main" section for breadcrumbs
   const path = window.location.pathname;
   let mainSection = 'Overview';
-  if (path.includes('/dashboard')) {
-    mainSection = 'Overview';
-  } else if (path.includes('/pipeline')) {
-    mainSection = 'Pipeline Builder';
-  } else if (path.includes('/workspace')) {
-    mainSection = 'Workspace';
-  }
+  if (path.includes('/dashboard')) mainSection = 'Overview';
+  else if (path.includes('/pipeline')) mainSection = 'Pipeline Builder';
+  else if (path.includes('/workspace')) mainSection = 'Workspace';
 
   return (
     <>
-      {/* Import Inter font */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
@@ -59,7 +57,7 @@ export default function Navbar({ pageTitle = 'Dashboard', hasSave = false, hasEx
         }
       `}</style>
 
-      {/* Top Navbar - Header Only */}
+      {/* Top Navbar */}
       <header style={{
         height: '56px',
         backgroundColor: 'white',
@@ -69,53 +67,42 @@ export default function Navbar({ pageTitle = 'Dashboard', hasSave = false, hasEx
         justifyContent: 'space-between',
         padding: '0 24px'
       }}>
-        {/* Left: Logo & Breadcrumbs */}
+        
+        {/* Left: Logo + Breadcrumb */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           gap: '24px'
         }}>
-          <Logo />
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <span style={{
-              color: '#6B7280',
-              fontSize: '13px',
-              fontWeight: '400'
-            }}>
-              {mainSection}
-            </span>
-            <span style={{
-              color: '#6B7280',
-              fontSize: '13px',
-              fontWeight: '400'
-            }}>
-              /
-            </span>
-            <span style={{
-              color: '#111827',
-              fontSize: '13px',
-              fontWeight: '500'
-            }}>
+
+          {/* 🔥 CLICKABLE LOGO — GO TO TOOLKIT */}
+          <button 
+            onClick={() => navigate('/home')}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer'
+            }}
+          >
+            <Logo />
+          </button>
+
+          {/* Breadcrumb */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ color: '#6B7280', fontSize: '13px' }}>{mainSection}</span>
+            <span style={{ color: '#6B7280', fontSize: '13px' }}>/</span>
+            <span style={{ color: '#111827', fontSize: '13px', fontWeight: '500' }}>
               {pageTitle}
             </span>
           </div>
         </div>
 
-        {/* Right: Actions */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-          {/* Search */}
-          <div style={{
-            position: 'relative',
-            marginRight: '8px'
-          }}>
+        {/* Right Side Icons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+
+          {/* Search Bar */}
+          <div style={{ position: 'relative', marginRight: '8px' }}>
             <Search style={{
               position: 'absolute',
               left: '12px',
@@ -154,78 +141,24 @@ export default function Navbar({ pageTitle = 'Dashboard', hasSave = false, hasEx
               transform: 'translateY(-50%)',
               padding: '2px 6px',
               fontSize: '12px',
-              fontWeight: '500',
-              color: '#6B7280',
               backgroundColor: 'white',
               border: '1px solid #E5E7EB',
-              borderRadius: '4px'
+              borderRadius: '4px',
+              color: '#6B7280'
             }}>
               ⌘K
             </kbd>
           </div>
 
-          {hasSave && (
-            <button 
-              onClick={onSave}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 14px',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                backgroundColor: 'transparent',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'background-color 0.15s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F9FAFB'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              <Save size={16} strokeWidth={2} />
-              Save
-            </button>
-          )}
-
-          {hasExport && (
-            <button 
-              onClick={onExport}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 14px',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: 'white',
-                backgroundColor: '#2563EB',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'background-color 0.15s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1D4ED8'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563EB'}
-            >
-              <DownloadCloud size={16} strokeWidth={2} />
-              Export
-            </button>
-          )}
-
+          {/* 🔔 Notifications */}
           <button 
             style={{
               padding: '8px',
               color: '#6B7280',
-              backgroundColor: 'transparent',
+              background: 'transparent',
               border: 'none',
               borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'background-color 0.15s',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              cursor: 'pointer'
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F9FAFB'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -233,18 +166,15 @@ export default function Navbar({ pageTitle = 'Dashboard', hasSave = false, hasEx
             <Bell size={18} strokeWidth={2} />
           </button>
 
+          {/* ⚙️ Settings */}
           <button 
             style={{
               padding: '8px',
               color: '#6B7280',
-              backgroundColor: 'transparent',
+              background: 'transparent',
               border: 'none',
               borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'background-color 0.15s',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              cursor: 'pointer'
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F9FAFB'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -252,8 +182,8 @@ export default function Navbar({ pageTitle = 'Dashboard', hasSave = false, hasEx
             <Settings size={18} strokeWidth={2} />
           </button>
 
-          
         </div>
+
       </header>
     </>
   );
