@@ -1,31 +1,53 @@
 import React, { useState } from 'react';
-import { Search, Bell, Settings, Database } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';   // ← ADDED
+import { Search, Bell, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-// Logo Component
+// Logo Component - Updated to match sidebar style
 const Logo = () => (
   <div style={{
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    padding: '16px'
+    gap: '10px'
   }}>
     <div style={{
-      width: '28px',
-      height: '28px',
-      backgroundColor: '#111827',
+      width: '32px',
+      height: '32px',
+      backgroundColor: '#1F2937',
       borderRadius: '8px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
     }}>
-      <Database style={{ width: '16px', height: '16px', color: 'white', strokeWidth: 2.5 }} />
+      <div style={{
+        width: '20px',
+        height: '20px',
+        border: '2px solid white',
+        borderRadius: '3px',
+        position: 'relative'
+      }}>
+        <div style={{
+          position: 'absolute',
+          top: '4px',
+          left: '3px',
+          right: '3px',
+          height: '2px',
+          backgroundColor: 'white'
+        }} />
+        <div style={{
+          position: 'absolute',
+          top: '9px',
+          left: '3px',
+          right: '3px',
+          height: '2px',
+          backgroundColor: 'white'
+        }} />
+      </div>
     </div>
     <span style={{
-      fontSize: '16px',
-      fontWeight: '600',
-      letterSpacing: '-0.01em',
-      color: '#111827'
+      fontSize: '18px',
+      fontWeight: '700',
+      color: '#1F2937',
+      letterSpacing: '-0.02em'
     }}>
       DATASTREAM
     </span>
@@ -36,7 +58,7 @@ export default function Navbar({ pageTitle = 'Dashboard' }) {
   const [searchValue, setSearchValue] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
 
-  const navigate = useNavigate();     // ← ADDED
+  const navigate = useNavigate();
 
   // Determine current "main" section for breadcrumbs
   const path = window.location.pathname;
@@ -72,7 +94,7 @@ export default function Navbar({ pageTitle = 'Dashboard' }) {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '24px'
+          gap: '12px'
         }}>
 
           {/* 🔥 CLICKABLE LOGO — GO TO TOOLKIT */}
